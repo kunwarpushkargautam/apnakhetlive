@@ -52,7 +52,7 @@ exports.paytmPaynow = async (req, res) => {
     mid: PaytmConfig.PaytmConfig.mid,
     websiteName: PaytmConfig.PaytmConfig.website,
     orderId: orderId,
-    callbackUrl: `http://localhost:${port}/callback`,
+    callbackUrl: `https://apnakhetlive.herokuapp.com/callback`,
     txnAmount: {
       value: tamount,
       currency: "INR",
