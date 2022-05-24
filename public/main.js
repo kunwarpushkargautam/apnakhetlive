@@ -7,14 +7,6 @@ let shopProducts = [
     price: 1200,
     image: "/images/img3.jpg",
     incart: 0,
-  },
-  {
-    productid: "m2",
-    name: "bambai MANGO",
-    hindiName: "मालदह आम",
-    price: 500,
-    image: "/images/img3.jpg",
-    incart: 0,
   }
 ];
 
@@ -94,16 +86,18 @@ function onLoadCartNumber() {
     for(let i =0;i<productsInCartList.length;i++){
       console.log("one product=>",productsInCartList[i])
       totreload = totreload + productsInCartList[i].incart*productsInCartList[i].price;
-    }
+    }}
     localStorage.setItem("totalCost",totreload);
     // document.getElementById("product_total_amt").innerText=
     console.log("sum Reloaded", typeof(totreload));
-  }
+  
 
   if (productNumbers) {
     for (let k = 0; k < cartnum.length; k++) {
       cartnum[k].textContent = productNumbers;
     }
+  }else{
+    localStorage.setItem("cartNumbers",0);
   }
 }
 
