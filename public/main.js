@@ -13,7 +13,7 @@ let shopProducts = [
 let populateShopCard = () => {
   let productCardList = document.getElementById("productCardList");
   const productCardHtml = shopProducts.map((product, i) => {
-    return `<div class="nodecoration col-lg-3  col-md-4 col-sm-6 col-11  p-2">
+    return `<div class="nodecoration col-lg-3  col-md-4 col-sm-6 col-11  p-2 wow animate__animated animate__zoomIn">
             <div class="card border-0 shadow py-3 text-center">
                     <div class="card-img pt-2 mx-auto  zoomonhover">
                         <img src="${product.image}" class="img-width  container-fluid " alt="">
