@@ -1,4 +1,5 @@
 let cartnum = document.querySelectorAll(".cartnum sup");
+
 let shopProducts = [
   {
     productid: "m1",
@@ -60,11 +61,37 @@ function buynow() {
   }
 }
 
+
+const removeDiscountApply = () => {
+  let product_total_amt = document.getElementById('product_total_amt');
+      let shipping_charge = document.getElementById('shipping_charge');
+      let discountCode = document.getElementById('discount_code1');
+      let code1 = document.getElementById('discountCode1');
+      let error_trw = document.getElementById('error_trw');
+      let total_cart_amt = document.getElementById('total_cart_amt');
+      let recoverTotalAmount = parseInt(product_total_amt.innerText);
+      console.log("1", recoverTotalAmount);
+  document.getElementById("discountLabel").classList.add("d-none");
+  let curr_prdct_tot_amount = parseInt(product_total_amt.innerText);
+  if(curr_prdct_tot_amount >= 1000){
+      shipping_charge.innerText = "0";
+  }else{
+      shipping_charge.innerText = "100";
+  }
+  discountCode.value = code1.innerText;
+  discountCode.value = "";
+  error_trw.innerText = "check And Apply Code";
+  code1.parentNode.classList.remove("valid");
+  total_cart_amt.innerText = recoverTotalAmount + parseInt(shipping_charge.innerText);
+  setCookie('amount', total_cart_amt.innerText, 1);
+}
+
 function redirectToCart() {
   window.location.assign("cart");
 }
 
 function onLoadCartNumber() {
+  
   let totreload = 0;
   // let totalCost = document.getElementById("")
   let productNumbers = localStorage.getItem("cartNumbers");
@@ -99,6 +126,7 @@ function onLoadCartNumber() {
   }else{
     localStorage.setItem("cartNumbers",0);
   }
+  removeDiscountApply();
 }
 
 function cartNumbers(product) {
