@@ -35,7 +35,10 @@ exports.razorPayOrder = async (req, res) => {
   console.log(datakey);
   UserData = await CustomerCart.findOne({ customerKey: datakey });
   userDbId = UserData._id.toString();
-  let tamount = UserData.totalCost;
+  if (UserData.paymentStatus === "success") {
+    res.json({ paymentstatus:"success" });
+  }else{
+    let tamount = UserData.totalCost;
   let phone = UserData.whatsapp;
   let email = UserData.email;
   let fname = UserData.fullname;
@@ -57,6 +60,7 @@ exports.razorPayOrder = async (req, res) => {
     receipt: receiptno,
   });
   console.log("order generated successfully==>", order);
+  
   res.status(201).json({
     success: true,
     order,
@@ -67,15 +71,18 @@ exports.razorPayOrder = async (req, res) => {
     productArrayMail,
     key:instance.key_id
   });
+  }
+  
 };
 
 exports.razorPayOrderResponse = async(req, res) => {
   let razorpay_payment_id = req.body.razorpay_payment_id;
+  let failpayid = req.body.failpayid;
   let tosendEmail = req.body.email;
   let mailObj = req.body.mailitems;
   let amountPaid = req.body.amount;
   let phone = req.body.phone;
-  console.log(amountPaid)
+  console.log(req.body,failpayid)
   let strmsg='Your Order of ';
   for(let j=0;j<mailObj.length;j++){
       strmsg = strmsg + mailObj[j].name + ' of Qty '+ mailObj[j].cart +', ';
@@ -101,12 +108,30 @@ exports.razorPayOrderResponse = async(req, res) => {
       paymentGateway: "RazorPay",
       mode: '',
     };
-  
-    let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
-      { _id: userDbId },
-      { paymentStatus: true, paymentByGateway: "RazorPay" },
-      { returnOriginal: false }
-    );
+    
+    if(failpayid !== undefined){
+      let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
+        { _id: userDbId },
+        {
+          paymentCreated: true,
+          paymentStatus: "failed",
+          paymentByGateway: "RazorPay",
+        },
+        { returnOriginal: false }
+      );
+    }else{
+      let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
+        { _id: userDbId },
+        {
+          paymentCreated: true,
+          paymentStatus: "success",
+          paymentByGateway: "RazorPay",
+        },
+        { returnOriginal: false }
+      );
+    }
+    
+
   
     const customerAndpayment = new OrderPayment({
       userid: UserData._id,

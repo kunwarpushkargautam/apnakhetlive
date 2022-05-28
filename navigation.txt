@@ -13,6 +13,20 @@ PAYTM_MID = fiudkI52824526146010
 PAYTM_KEY= zHPdmBE%pYeY%Phd
 PAYTM_WEBSITE = DEFAULT
 ====================================================================================================
+SP_USERNAME = sdfggdsg_1210
+SP_PASS = ABN_SP1210
+SP_CLENT = ABN01
+SP_PGMID = 5666
+SP_AUTHKEY = wRAKcWb8WjGSU8Z2
+SP_AUTHIV = 9oalkb7SCYunVDYg
+
+
+SP_USERNAME = bhabesh.jha_4406
+SP_PASS = APKBF_SP4406
+SP_CLENT = APKBF
+#SP_PGMID = 5666
+SP_AUTHKEY = o8UgmCLh25iQUZTk
+SP_AUTHIV = AQnohofsAuwF954K
 =====================================================================================================
 // "use strict";
 
