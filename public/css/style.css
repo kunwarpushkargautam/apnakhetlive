@@ -40,18 +40,6 @@
 }
 
 
-
-.parallax {
-  /* The image used */
-  background-image: url("/public/images/a2.jpg");
-  width: 100%;
-  height: 100%;
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .zoomonhover {
   overflow: hidden;
 
@@ -652,7 +640,7 @@ a {
   border-radius: 5px;
   transition: 0.5s;
   box-shadow: 0px 0px 20px rgb(128, 128, 128, 0.6);
-  background-color: rgb(255, 255, 255);
+  background-color: rgba(190, 234, 255, 0.5);
 }
 
 .whatsappTool a {
