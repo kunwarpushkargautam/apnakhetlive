@@ -23,8 +23,8 @@ let mailTransporter = nodemailer.createTransport({
   },
 });
 var spURL = null;
-const success = `http://127.0.0.1:3000/response.js`;
-const failure = `http://127.0.0.1:3000/response.js`;
+const success = `https://apnakhetlive.herokuapp.com/response.js`;
+const failure = `https://apnakhetlive.herokuapp.com/response.js`;
 var spCkey;
 
 exports.sabPaisa = async (req, res) => {
