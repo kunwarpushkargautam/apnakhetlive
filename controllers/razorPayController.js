@@ -149,14 +149,14 @@ exports.razorPayOrderResponse = async(req, res) => {
       }
     });
  
-    twilioClient.messages 
-    .create({ 
-       body: strmsg+'with total payment of '+ amountPaid +' thank you!!. contact: wa.me/919262290959 Or mail us : business@apnakhet.org. Visit: http://www.apnakhet.in ', 
-       from: 'whatsapp:+14155238886',       
-       to: `whatsapp:+91${phone}` 
-     }) 
-    .then(message => console.log("wasdasd9u==>",message.sid)) 
-    .done();
+    // twilioClient.messages 
+    // .create({ 
+    //    body: strmsg+'with total payment of '+ amountPaid +' thank you!!. contact: wa.me/919262290959 Or mail us : business@apnakhet.org. Visit: http://www.apnakhet.in ', 
+    //    from: 'whatsapp:+14155238886',       
+    //    to: `whatsapp:+91${phone}` 
+    //  }) 
+    // .then(message => console.log("wasdasd9u==>",message.sid)) 
+    // .done();
 
   }
   res.send();

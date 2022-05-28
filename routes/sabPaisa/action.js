@@ -234,17 +234,30 @@ exports.postSpRes = async (req, res) => {
         }
         strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.${resUrl.reMsg}`;
         console.log(strmsg);
-        let mailDetails = {
+        if(sabPaisaPaymDetail.status === 'FAILED'){
+          let mailDetails = {
+            to: email,
+            from: "noreply.apnakhet@gmail.com",
+            subject: "Order Status",
+            html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
+              <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
+              <p>${strmsg}</p>
+              <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
+              <p>Please try after after sometime Or Use Razorpay</p>
+        `,
+          };
+        }else{let mailDetails = {
           to: email,
           from: "noreply.apnakhet@gmail.com",
           subject: "Order Status",
           html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
             <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
             <p>${strmsg}</p>
-            <p>Total Amount recived ${result.totalCost} via SabPaisa </p>
+            <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
             <p>We are heartly thankful to You for purchasing from us</p>
       `,
-        };
+        };}
+        
         mailTransporter.sendMail(mailDetails, function (err, data) {
           if (err) {
             console.log("Error Occurs");
