@@ -349,8 +349,9 @@ exports.spresponse = async (req, res) => {
         }
         strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.${resUrl.reMsg}`;
         console.log(strmsg);
+        let mailDetails
         if(sabPaisaPaymDetail.status === 'FAILED'){
-          let mailDetails = {
+           mailDetails = {
             to: email,
             from: "noreply.apnakhet@gmail.com",
             subject: "Order Status",
@@ -361,7 +362,7 @@ exports.spresponse = async (req, res) => {
               <p>Please try after after sometime Or Use Razorpay</p>
         `,
           };
-        }else{let mailDetails = {
+        }else{ mailDetails = {
           to: email,
           from: "noreply.apnakhet@gmail.com",
           subject: "Order Status",
