@@ -1,0 +1,66 @@
+<script>
+  let DemandFruitProducts = [
+    {
+      productid: "d5",
+      name: "BAMBAI MANGO ( बम्बई )",
+      //price: 800,
+      priceInfo: "whatsapp for best price",
+      image: "/images/bam.jpg",
+      info: "",
+      incart: 0,
+      pinfo:" ",
+    },
+    {
+      productid: "d6",
+      name: "ZARDA/ZARDALU (जर्दा/जर्दालू)",
+      //price: 1000,
+      priceInfo: "whatsapp for best price",
+      image: "/images/jard.jpg",
+      info: "",
+      incart: 0,
+      pinfo:" ",
+    },
+    {
+      productid: "d7",
+      name: "SHUKUL (शुकुल)",
+      hindiName: "शुकुल",
+      //price: 1300,
+      priceInfo: "whatsapp for best price",
+      image: "/images/sukul.jpeg", info: "",
+      incart: 0,
+      pinfo:" ",
+    }
+  ];
+
+
+
+  let populateFruitDemandCard = () => {
+    let demandCardList = document.getElementById("fruitlistDemand");
+    const productCardHtml = DemandFruitProducts.map((product, i) => {
+      return `<div class="nodecoration col-lg-3 col-xl-2 col-md-4 col-sm-6 col-11  p-2 wow animate__animated animate__zoomIn">
+        <a href="" target="_blank">
+            <div class="card border-0 shadow py-3 ">
+                <div class="card-img pt-2 mx-auto zoomonhover  ">
+                    <img src="${product.image}" class="img-width  container-fluid " alt="">
+                </div>
+                <div class="card-body mx-auto text-center py-0">
+                    <h5 class=" my-1 text-secondary">${product.name}</h5>
+                    <a href="" class="infotag" data-bs-toggle="tooltip" data-bs-html="true"  title="${product.info}"><i class="fa-solid fa-circle-info  "></i><span
+                            class="px-1">info</span></a>
+                    <p class="text-muted my-0 ">Fresh and Natural  products. All are chemical residue free.<br> ${product.pinfo}</p>
+                    <a href="https://wa.me/+919262290959/?text=Hello%20there.%20I%20need%20information%20about%20'${product.name}'." target="_blank"><p class="text-bold"><i class="fa-solid fa-circle-info"></i><span
+                            class="px-1">${product.priceInfo}</span></p></a>
+
+                </div>
+                <a href="https://wa.me/+919262290959/?text=Hello%20there.%20I%20want%20to%20demand%20this%20product.%20So%20I%20need%20information%20about%20'${product.name}'." target="_blank" class=" text-center   btncustom1 mx-3 "><i class="fa-solid fa-cart-plus"></i> Demand</a>
+            </div>
+        </a>
+    </div>`;
+    });
+
+    if (demandCardList) {
+      demandCardList.innerHTML += productCardHtml.toString().replaceAll(",", "");
+    }
+  }
+  populateFruitDemandCard();
+</script>
