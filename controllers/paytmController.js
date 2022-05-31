@@ -15,7 +15,7 @@ const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
-
+let greetpath = path.join(__dirname, "../public/images");
 let mailTransporter = nodemailer.createTransport({
   service: "gmail",
   secure: true,
@@ -31,6 +31,7 @@ const port = process.env.PORT || 3000;
 console.log("this is my port==>", port);
 
 exports.paytmPaynow = async (req, res) => {
+  console.log("dirname==>",path.join(__dirname, "../public/images"))
   var data = req.body;
   console.log(data);
   UserData = await CustomerCart.findOne({ customerKey: data.key });
@@ -52,7 +53,7 @@ exports.paytmPaynow = async (req, res) => {
     let tamount = UserData.totalCost;
     let email = UserData.email;
 
-    const orderId = "TEST_" + new Date().getTime();
+    const orderId = "AKBF_" + new Date().getTime();
 
     const paytmParams = {};
 
@@ -61,7 +62,7 @@ exports.paytmPaynow = async (req, res) => {
       mid: PaytmConfig.PaytmConfig.mid,
       websiteName: PaytmConfig.PaytmConfig.website,
       orderId: orderId,
-      callbackUrl: `http://localhost:${port}/callback`,
+      callbackUrl: `https://apnakhetlive.herokuapp.com/callback`,
       txnAmount: {
         value: tamount,
         currency: "INR",
@@ -143,6 +144,7 @@ exports.paytmCallback = async (req, res) => {
   console.log(
     "=================================== CALLBACK START ======================================================="
   );
+  
   let strmsg;
   console.log("this is res call==>", req.body);
   var data = req.body;
@@ -167,8 +169,9 @@ exports.paytmCallback = async (req, res) => {
     paymentGateway: "Paytm",
     mode: data.PAYMENTMODE,
   };
-
+let message;
   if (data.STATUS === "TXN_SUCCESS") {
+     message = 'success';
     let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
       { _id: userDbId },
       {
@@ -179,6 +182,7 @@ exports.paytmCallback = async (req, res) => {
       { returnOriginal: false }
     );
   } else {
+    message = 'failed';
     let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
       { _id: userDbId },
       {
@@ -211,7 +215,7 @@ exports.paytmCallback = async (req, res) => {
     .save()
     .then((result) => {
       console.log("paytm data from result==>", result.productsInCart);
-      strmsg = "Your Order of ";
+      strmsg = "with  ";
       for (let j = 0; j < result.productsInCart.length; j++) {
         strmsg =
           strmsg +
@@ -220,40 +224,48 @@ exports.paytmCallback = async (req, res) => {
           result.productsInCart[j].incart +
           ", ";
       }
-      strmsg = strmsg + "have been received.";
+      strmsg = strmsg + "in cart";
       console.log(strmsg);
       let mailDetails = {
         to: email,
-        from: "noreply.apnakhet@gmail.com",
+        from: "no-reply@apnakhet.org",
         subject: "Order Confirmation",
         html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
-            <p>We have received payments with payment id : ${paytmPaymDetail.txnId} </p>
+            <p>Order with payment id : ${paytmPaymDetail.txnId} </p>
             <p>${strmsg}</p>
-            <p>Total Amount recived ${result.totalCost} via Paytm </p>
-            <p>We are heartly thankful to You for purchasing from us</p>
+            <p>have been "${message}" of total cost  ${result.totalCost} via Paytm </p>
+            <p>We are heartly thankful to You </p>
+            <p>Note: Retry with sabPaisa if payment failed </p>
       `,
+      attachments: [
+        {
+            filename: 'greet.jpeg',
+            path:greetpath + '\\greet.jpeg',
+            cid: 'uniq-greet.jpeg'
+        }
+    ]
       };
       mailTransporter.sendMail(mailDetails, function (err, data) {
         if (err) {
-          console.log("Error Occurs");
+          console.log("Error Occurs",mailDetails);
         } else {
-          console.log("Email sent successfully");
+          console.log("Email sent successfully",mailDetails);
         }
       });
     });
   console.log(strmsg);
-  twilioClient.messages
-    .create({
-      body:
-        strmsg +
-        "with total payment of " +
-        UserData.totalCost +
-        " thank you!!. contact: wa.me/919262290959 Or mail us : business@apnakhet.org. Visit: http://www.apnakhet.in ",
-      from: "whatsapp:+14155238886",
-      to: `whatsapp:+91${UserData.whatsapp}`,
-    })
-    .then((message) => console.log("wasdasd9u==>", message.sid))
-    .done();
+  // twilioClient.messages
+  //   .create({
+  //     body:
+  //       strmsg +
+  //       "with total payment of " +
+  //       UserData.totalCost +
+  //       " thank you!!. contact: wa.me/919262290959 Or mail us : business@apnakhet.org. Visit: https://www.apnakhet.org ",
+  //     from: "whatsapp:+14155238886",
+  //     to: `whatsapp:+91${UserData.whatsapp}`,
+  //   })
+  //   .then((message) => console.log("wasdasd9u==>", message.sid))
+  //   .done();
 
   var body = "";
 

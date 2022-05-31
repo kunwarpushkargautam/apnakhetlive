@@ -83,11 +83,11 @@ exports.razorPayOrderResponse = async(req, res) => {
   let amountPaid = req.body.amount;
   let phone = req.body.phone;
   console.log(req.body,failpayid)
-  let strmsg='Your Order of ';
+  let strmsg='having items in cart : ';
   for(let j=0;j<mailObj.length;j++){
       strmsg = strmsg + mailObj[j].name + ' of Qty '+ mailObj[j].cart +', ';
   }
-  strmsg = strmsg + 'have been received.'
+  strmsg = strmsg + " ";
   console.log(strmsg);
   if (UserData === undefined) {
     res.render("error", {
@@ -108,8 +108,9 @@ exports.razorPayOrderResponse = async(req, res) => {
       paymentGateway: "RazorPay",
       mode: '',
     };
-    
+    let message;
     if(failpayid !== undefined){
+      message = 'failed';
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -120,6 +121,7 @@ exports.razorPayOrderResponse = async(req, res) => {
         { returnOriginal: false }
       );
     }else{
+      message = 'success';
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -155,14 +157,15 @@ exports.razorPayOrderResponse = async(req, res) => {
       .save()
 
     let mailDetails = {
-      from: "noreply.apnakhet@gmail.com",
+      from: "no-reply@apnakhet.org",
       to: tosendEmail,
-      subject: "Order Confirmation",
-      html:`<h5>Greetings from Apna Khet Bagan Foundtion</h5>
-            <p>We have received payments with payment id : ${razorpay_payment_id} </p>
-            <p>${strmsg}</p>
-            <p>Total Amount recived ${amountPaid} via RazorPay </p>
+      subject: "Order status",
+      html:`<h3>Greetings from Apna Khet Bagan Foundtion</h3>
+            <p>Order with payment id : ${razorpay_payment_id} </p>
+            <p>${strmsg} is ${message}</p>
+            <p>of Total Amount  ${amountPaid} via RazorPay </p>
             <p>We are heartly thankful to You for purchasing from us</p>
+            <p>Note: Retry with sabPaisa if payment failed </p>
       `
     };
 

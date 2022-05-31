@@ -2,6 +2,7 @@ require("dotenv").config();
 const request = require("request");
 const auth = require("./spauth");
 var url = require("url");
+const path = require("path");
 const base64 = require("base-64");
 const utf8 = require("utf8");
 const opn = require("open");
@@ -22,6 +23,8 @@ let mailTransporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD,
   },
 });
+let greetpath = path.join(__dirname, "../../public/images");
+console.log("greet from sabpaisa",greetpath)
 var spURL = null;
 // const success = `http://localhost:3000/response.js`;
 // const failure = `http://localhost:3000/response.js`;
@@ -36,9 +39,9 @@ exports.sabPaisa = async (req, res) => {
   console.log("payment status==>", UserData.paymentStatus);
   console.log(UserData.paymentStatus === "success");
   if (UserData.paymentStatus === "success") {
-    res.json({ paymentstatus:"success" });
+    res.json({ paymentstatus: "success" });
   } else {
-    let tamount = UserData.totalCost; 
+    let tamount = UserData.totalCost;
     let cName = UserData.fullname;
     let splitName = cName.split(" ");
     let fName = cName.split(" ")[0];
@@ -147,15 +150,13 @@ exports.sabPaisa = async (req, res) => {
     spURL = spDomain + spURL;
 
     while (spURL.includes("+")) {
-      // replace + with %2B
+ 
       spURL = spURL.replace("+", "%2B");
     }
 
-    //window.open(spURL);
+  
     console.log("this is url", spURL);
 
-    // opens the url in the default browser
-    // opn(spURL.replace('/[^a-zA-Z0-9]/g', ""), {app: ['google chrome']});
     spURL = spURL.replace(//g, "");
     console.log("sending this url=>", spURL);
     res.json({ url: spURL });
@@ -164,7 +165,7 @@ exports.sabPaisa = async (req, res) => {
 };
 
 exports.postSpRes = async (req, res) => {
-  // console.log("received from post",req.spCkey.keyId)
+
   let resUrl = url.parse(req.url, true).query;
   console.log("this is res url==>", resUrl);
   console.log("this is spCkey=>", spCkey);
@@ -197,14 +198,10 @@ exports.postSpRes = async (req, res) => {
     };
     var spRespCode = resUrl.spRespCode;
     console.log("this is spRespCode =====>", spRespCode, resUrl.transDate);
-
-    // let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
-    //   { _id: userDbId },
-    //   { paymentStatus: true, paymentByGateway: resUrl.payMode },
-    //   { returnOriginal: false }
-    // );
+    let message;
 
     if (resUrl.spRespStatus === "FAILED") {
+      message = "failed";
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -215,6 +212,7 @@ exports.postSpRes = async (req, res) => {
         { returnOriginal: false }
       );
     } else {
+      message = "success";
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -248,7 +246,7 @@ exports.postSpRes = async (req, res) => {
       .save()
       .then((result) => {
         console.log("paytm data from result==>", result.productsInCart);
-        let strmsg = "Your Order of ";
+        let strmsg = "having item(s) in cart  ";
         for (let j = 0; j < result.productsInCart.length; j++) {
           strmsg =
             strmsg +
@@ -257,7 +255,7 @@ exports.postSpRes = async (req, res) => {
             result.productsInCart[j].incart +
             ", ";
         }
-        strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.${resUrl.reMsg}`;
+        strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.`;
         console.log(strmsg);
         if (sabPaisaPaymDetail.status === "FAILED") {
           mailDetails = {
@@ -265,10 +263,12 @@ exports.postSpRes = async (req, res) => {
             from: "no-reply@apnakhet.org",
             subject: "Order Status",
             html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
-              <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
+              <p>Order with payment id : ${sabPaisaPaymDetail.txnId} </p>
               <p>${strmsg}</p>
               <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
-              <p>Please try after after sometime Or Use Razorpay</p>
+              <p>Please try again Or aftr Some time </p>
+              <p>Contact us  in case any enquery</p>
+              <a herf="https://www.apnakhet.org/help" > contact here: https://www.apnakhet.org/help</a>
         `,
           };
         } else {
@@ -282,14 +282,21 @@ exports.postSpRes = async (req, res) => {
             <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
             <p>We are heartly thankful to You for purchasing from us</p>
       `,
+            attachments: [
+              {
+                filename: "greet.jpeg",
+                path: greetpath + "\\greet.jpeg",
+                cid: "uniq-greet.jpeg",
+              },
+            ],
           };
         }
 
         mailTransporter.sendMail(mailDetails, function (err, data) {
           if (err) {
-            console.log("Error Occurs");
+            console.log("Error Occurs===>",err);
           } else {
-            console.log("Email sent successfully");
+            console.log("Email sent successfully",mailDetails);
           }
         });
       });
@@ -342,7 +349,9 @@ exports.spresponse = async (req, res) => {
     //   { paymentStatus: true, paymentByGateway: resUrl.payMode },
     //   { returnOriginal: false }
     // );
+    let message;
     if (resUrl.spRespStatus === "FAILED") {
+      message = "failed";
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -353,6 +362,7 @@ exports.spresponse = async (req, res) => {
         { returnOriginal: false }
       );
     } else {
+      message = "success";
       let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
         { _id: userDbId },
         {
@@ -385,7 +395,7 @@ exports.spresponse = async (req, res) => {
       .save()
       .then((result) => {
         console.log("paytm data from result==>", result.productsInCart);
-        let strmsg = "Your Order of ";
+        let strmsg = "having item(s) in cart  ";
         for (let j = 0; j < result.productsInCart.length; j++) {
           strmsg =
             strmsg +
@@ -394,20 +404,21 @@ exports.spresponse = async (req, res) => {
             result.productsInCart[j].incart +
             ", ";
         }
-        strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.${resUrl.reMsg}`;
+        strmsg = strmsg + `is ${sabPaisaPaymDetail.status}.`;
         console.log(strmsg);
-        let mailDetails;
         if (sabPaisaPaymDetail.status === "FAILED") {
           mailDetails = {
             to: email,
             from: "no-reply@apnakhet.org",
             subject: "Order Status",
             html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
-              <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
-              <p>${strmsg}</p>
-              <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
-              <p>Please try after after sometime Or Use Razorpay</p>
-        `,
+            <p>Order with payment id : ${sabPaisaPaymDetail.txnId} </p>
+            <p>${strmsg}</p>
+            <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
+            <p>Please try again Or aftr Some time </p>
+            <p>Contact us on below link in case of money deduction</p>
+            <a herf="https://www.apnakhet.org/help"> Contact here :https://www.apnakhet.org/help</a>
+      `,
           };
         } else {
           mailDetails = {
@@ -415,13 +426,21 @@ exports.spresponse = async (req, res) => {
             from: "no-reply@apnakhet.org",
             subject: "Order Status",
             html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
-            <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
-            <p>${strmsg}</p>
-            <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
-            <p>We are heartly thankful to You for purchasing from us</p>
-      `,
+          <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
+          <p>${strmsg}</p>
+          <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
+          <p>We are heartly thankful to You for purchasing from us</p>
+    `,
+            attachments: [
+              {
+                filename: "greet.jpeg",
+                path: greetpath + "\\greet.jpeg",
+                cid: "uniq-greet.jpeg",
+              },
+            ],
           };
         }
+
         mailTransporter.sendMail(mailDetails, function (err, data) {
           if (err) {
             console.log("Error Occurs");
@@ -430,8 +449,6 @@ exports.spresponse = async (req, res) => {
           }
         });
       });
-
-    //{ sabPaisaResparams }
   }
   res.render("sabPaisaPaymentStatus", { sabPaisaResparams: resUrl });
 };
