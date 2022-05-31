@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 require("./db/connection");
 var crypto = require('crypto');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 const static_path = path.join(__dirname, "../public");
 const views_path = path.join(__dirname, "../templates/views");
