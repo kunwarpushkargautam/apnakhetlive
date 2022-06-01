@@ -34,110 +34,119 @@ exports.paytmPaynow = async (req, res) => {
   console.log("dirname==>",path.join(__dirname, "../public/images"))
   var data = req.body;
   console.log(data);
-  UserData = await CustomerCart.findOne({ customerKey: data.key });
-  if (UserData.paymentStatus === "success") {
+  if(data.key === "--something went wrong---"){
     res.render("error", {
       statusCode: 400,
-      error: "Aready Paid for this Order",
-      desMsg: "For next order , Add item to cart and proceed with checkout",
+      error: "Details Or Items Not saved",
+      desMsg: "For  order , Add item to cart and proceed with checkout",
     });
-    // res.json({ paymentstatus:"success" });
-  } else {
-    let phone = UserData.whatsapp;
-    let fname = UserData.fullname;
-    let products = UserData.productsInCart;
-    userDbId = UserData._id.toString();
-    console.log("this is user data==>", UserData);
-    console.log("checking paytm porcess..emv", process.env.PAYTM_KEY);
-    console.log("checking paytm porcess..emv", process.env.PAYTM_MID);
-    let tamount = UserData.totalCost;
-    let email = UserData.email;
-
-    const orderId = "AKBF_" + new Date().getTime();
-
-    const paytmParams = {};
-
-    paytmParams.body = {
-      requestType: "Payment",
-      mid: PaytmConfig.PaytmConfig.mid,
-      websiteName: PaytmConfig.PaytmConfig.website,
-      orderId: orderId,
-      callbackUrl: `https://apnakhetlive.herokuapp.com/callback`,
-      txnAmount: {
-        value: tamount,
-        currency: "INR",
-      },
-      userInfo: {
-        custId: email,
-      },
-    };
-    console.log("paytmParms", paytmParams);
-    PaytmChecksum.generateSignature(
-      JSON.stringify(paytmParams.body),
-      PaytmConfig.PaytmConfig.key
-    ).then(function (checksum) {
-      paytmParams.head = {
-        signature: checksum,
-      };
-
-      var post_data = JSON.stringify(paytmParams);
-
-      var options = {
-        /* for Staging */
-        hostname: "securegw-stage.paytm.in",
-
-        /* for Production */
-        // hostname: 'securegw.paytm.in',
-
-        port: 443,
-        path: `/theia/api/v1/initiateTransaction?mid=${PaytmConfig.PaytmConfig.mid}&orderId=${orderId}`,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": post_data.length,
+  }else{
+    UserData = await CustomerCart.findOne({ customerKey: data.key });
+    if (UserData.paymentStatus === "success") {
+      res.render("error", {
+        statusCode: 400,
+        error: "Aready Paid for this Order",
+        desMsg: "For next order , Add item to cart and proceed with checkout",
+      });
+      // res.json({ paymentstatus:"success" });
+    } else {
+      let phone = UserData.whatsapp;
+      let fname = UserData.fullname;
+      let products = UserData.productsInCart;
+      userDbId = UserData._id.toString();
+      console.log("this is user data==>", UserData);
+      console.log("checking paytm porcess..emv", process.env.PAYTM_KEY);
+      console.log("checking paytm porcess..emv", process.env.PAYTM_MID);
+      let tamount = UserData.totalCost;
+      let email = UserData.email;
+  
+      const orderId = "AKBF_" + new Date().getTime();
+  
+      const paytmParams = {};
+  
+      paytmParams.body = {
+        requestType: "Payment",
+        mid: PaytmConfig.PaytmConfig.mid,
+        websiteName: PaytmConfig.PaytmConfig.website,
+        orderId: orderId,
+        callbackUrl: `https://apnakhetlive.herokuapp.com/callback`,
+        txnAmount: {
+          value: tamount,
+          currency: "INR",
+        },
+        userInfo: {
+          custId: email,
         },
       };
-
-      var response = "";
-      var post_req = https.request(options, function (post_res) {
-        post_res.on("data", function (chunk) {
-          response += chunk;
+      console.log("paytmParms", paytmParams);
+      PaytmChecksum.generateSignature(
+        JSON.stringify(paytmParams.body),
+        PaytmConfig.PaytmConfig.key
+      ).then(function (checksum) {
+        paytmParams.head = {
+          signature: checksum,
+        };
+  
+        var post_data = JSON.stringify(paytmParams);
+  
+        var options = {
+          /* for Staging */
+          hostname: "securegw-stage.paytm.in",
+  
+          /* for Production */
+          // hostname: 'securegw.paytm.in',
+  
+          port: 443,
+          path: `/theia/api/v1/initiateTransaction?mid=${PaytmConfig.PaytmConfig.mid}&orderId=${orderId}`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": post_data.length,
+          },
+        };
+  
+        var response = "";
+        var post_req = https.request(options, function (post_res) {
+          post_res.on("data", function (chunk) {
+            response += chunk;
+          });
+  
+          post_res.on("end", function () {
+            response = JSON.parse(response);
+            console.log("txnToken:", response);
+  
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.write(`<html>
+                                    <head>
+                                        <title>Show Payment Page</title>
+                                    </head>
+                                    <body>
+                                        <center>
+                                            <h1>Please do not refresh this page...</h1>
+                                        </center>
+                                        <form method="post" action="https://securegw-stage.paytm.in/theia/api/v1/showPaymentPage?mid=${PaytmConfig.PaytmConfig.mid}&orderId=${orderId}" name="paytm">
+                                            <table border="1">
+                                                <tbody>
+                                                    <input type="hidden" name="mid" value="${PaytmConfig.PaytmConfig.mid}">
+                                                        <input type="hidden" name="orderId" value="${orderId}">
+                                                        <input type="hidden" name="txnToken" value="${response.body.txnToken}">
+                                             </tbody>
+                                          </table>
+                                                        <script type="text/javascript"> document.paytm.submit(); </script>
+                                       </form>
+                                    </body>
+                                 </html>`);
+            res.end();
+          });
         });
-
-        post_res.on("end", function () {
-          response = JSON.parse(response);
-          console.log("txnToken:", response);
-
-          res.writeHead(200, { "Content-Type": "text/html" });
-          res.write(`<html>
-                                  <head>
-                                      <title>Show Payment Page</title>
-                                  </head>
-                                  <body>
-                                      <center>
-                                          <h1>Please do not refresh this page...</h1>
-                                      </center>
-                                      <form method="post" action="https://securegw-stage.paytm.in/theia/api/v1/showPaymentPage?mid=${PaytmConfig.PaytmConfig.mid}&orderId=${orderId}" name="paytm">
-                                          <table border="1">
-                                              <tbody>
-                                                  <input type="hidden" name="mid" value="${PaytmConfig.PaytmConfig.mid}">
-                                                      <input type="hidden" name="orderId" value="${orderId}">
-                                                      <input type="hidden" name="txnToken" value="${response.body.txnToken}">
-                                           </tbody>
-                                        </table>
-                                                      <script type="text/javascript"> document.paytm.submit(); </script>
-                                     </form>
-                                  </body>
-                               </html>`);
-          res.end();
-        });
+  
+        post_req.write(post_data);
+        post_req.end();
       });
-
-      post_req.write(post_data);
-      post_req.end();
-    });
-    // });
+      // });
+    }
   }
+  
 };
 
 exports.paytmCallback = async (req, res) => {

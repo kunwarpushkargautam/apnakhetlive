@@ -152,7 +152,7 @@
                 alertmsg.innerText = "Transaction already made for this order, Add to cart and checkout for new Order";
                 homebtn.classList.remove("d-none")
                 payOptions.classList.add("d-none")
-            } else {
+            }else {
 
                 // console.log("this is razorpay data==>", orderData.key);
                 // "rzp_test_V06gmAT3UstD3C"
@@ -261,7 +261,14 @@
                 alertmsg.innerText = "Transaction already made for this order, Add to cart and checkout for new Order";
                 homebtn.classList.remove("d-none")
                 payOptions.classList.add("d-none")
-            } else {
+            } else if( resSabPaisa.paymentstatus === 'absentKey'){
+                alertbar.classList.remove("d-none");
+                alertbar.classList.remove("text-success");
+                alertbar.classList.add("text-danger");
+                alertmsg.innerText = " Add to cart and checkout to pay for order";
+                homebtn.classList.remove("d-none")
+                payOptions.classList.add("d-none")
+            }  else {
                 let furl = resSabPaisa.url;
                 console.log("this shoulf be url", furl);
                 window.open(resSabPaisa.url);
