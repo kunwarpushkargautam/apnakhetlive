@@ -27,7 +27,7 @@ let mailTransporter = nodemailer.createTransport({
 
 var UserData;
 var userDbId;
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 console.log("this is my port==>", port);
 
 exports.paytmPaynow = async (req, res) => {

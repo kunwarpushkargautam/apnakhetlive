@@ -287,7 +287,8 @@ exports.postSpRes = async (req, res) => {
             <p>${strmsg}</p>
             <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
             <p>We are heartly thankful to You for purchasing from us</p>
-      `,
+            <img src="cid:uniq-greet.jpeg" style="width:250px;" alt="greeting image" />
+            `,
             attachments: [
               {
                 filename: "greet.jpeg",
@@ -379,6 +380,7 @@ exports.spresponse = async (req, res) => {
         { returnOriginal: false }
       );
     }
+    let mailDetails;
     const customerAndpayment = new OrderPayment({
       userid: UserData._id,
       fullname: UserData.fullname,
@@ -436,7 +438,8 @@ exports.spresponse = async (req, res) => {
           <p>${strmsg}</p>
           <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
           <p>We are heartly thankful to You for purchasing from us</p>
-    `,
+          <img src="cid:uniq-greet.jpeg" style="width:250px;" alt="greeting image" />
+          `,
             attachments: [
               {
                 filename: "greet.jpeg",
