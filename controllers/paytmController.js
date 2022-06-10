@@ -42,6 +42,13 @@ exports.paytmPaynow = async (req, res) => {
     });
   } else {
     UserData = await CustomerCart.findOne({ customerKey: data.key });
+    if(UserData === null){
+      res.render("error", {
+        statusCode: 404,
+        error: "Oops! something went wrong ..Techies are working on it.... Try after sometimes..See U soon :-P ",
+        desMsg: "Some unexpected error occured.. we are solving.. till then u can order on Whatsapp",
+      });
+    }
     if (UserData.paymentStatus === "success") {
       res.render("error", {
         statusCode: 400,
