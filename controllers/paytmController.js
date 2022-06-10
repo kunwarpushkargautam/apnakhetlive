@@ -31,16 +31,16 @@ const port = process.env.PORT || 3000;
 console.log("this is my port==>", port);
 
 exports.paytmPaynow = async (req, res) => {
-  console.log("dirname==>",path.join(__dirname, "../public/images"))
+  console.log("dirname==>", path.join(__dirname, "../public/images"));
   var data = req.body;
   console.log(data);
-  if(data.key === "--something went wrong---"){
+  if (data.key === "--something went wrong---") {
     res.render("error", {
       statusCode: 400,
       error: "Details Or Items Not saved",
       desMsg: "For  order , Add item to cart and proceed with checkout",
     });
-  }else{
+  } else {
     UserData = await CustomerCart.findOne({ customerKey: data.key });
     if (UserData.paymentStatus === "success") {
       res.render("error", {
@@ -59,17 +59,17 @@ exports.paytmPaynow = async (req, res) => {
       console.log("checking paytm porcess..emv", process.env.PAYTM_MID);
       let tamount = UserData.totalCost;
       let email = UserData.email;
-  
+
       const orderId = "AKBF_" + new Date().getTime();
-  
+
       const paytmParams = {};
-  
+
       paytmParams.body = {
         requestType: "Payment",
         mid: PaytmConfig.PaytmConfig.mid,
         websiteName: PaytmConfig.PaytmConfig.website,
         orderId: orderId,
-        callbackUrl: `https://apnakhetlive.herokuapp.com/callback`,
+        callbackUrl: `https://apnakhet.in/callback`,
         txnAmount: {
           value: tamount,
           currency: "INR",
@@ -86,16 +86,16 @@ exports.paytmPaynow = async (req, res) => {
         paytmParams.head = {
           signature: checksum,
         };
-  
+
         var post_data = JSON.stringify(paytmParams);
-  
+
         var options = {
           /* for Staging */
           hostname: "securegw-stage.paytm.in",
-  
+
           /* for Production */
           // hostname: 'securegw.paytm.in',
-  
+
           port: 443,
           path: `/theia/api/v1/initiateTransaction?mid=${PaytmConfig.PaytmConfig.mid}&orderId=${orderId}`,
           method: "POST",
@@ -104,17 +104,17 @@ exports.paytmPaynow = async (req, res) => {
             "Content-Length": post_data.length,
           },
         };
-  
+
         var response = "";
         var post_req = https.request(options, function (post_res) {
           post_res.on("data", function (chunk) {
             response += chunk;
           });
-  
+
           post_res.on("end", function () {
             response = JSON.parse(response);
             console.log("txnToken:", response);
-  
+
             res.writeHead(200, { "Content-Type": "text/html" });
             res.write(`<html>
                                     <head>
@@ -139,21 +139,20 @@ exports.paytmPaynow = async (req, res) => {
             res.end();
           });
         });
-  
+
         post_req.write(post_data);
         post_req.end();
       });
       // });
     }
   }
-  
 };
 
 exports.paytmCallback = async (req, res) => {
   console.log(
     "=================================== CALLBACK START ======================================================="
   );
-  
+
   let strmsg;
   console.log("this is res call==>", req.body);
   var data = req.body;
@@ -178,9 +177,11 @@ exports.paytmCallback = async (req, res) => {
     paymentGateway: "Paytm",
     mode: data.PAYMENTMODE,
   };
-let message;
+  let message;
+  let thankRetryMsg;
   if (data.STATUS === "TXN_SUCCESS") {
-     message = 'success';
+    message = "success";
+     thankRetryMsg = "We are heartly thankful to You for purchasing from us";
     let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
       { _id: userDbId },
       {
@@ -191,7 +192,8 @@ let message;
       { returnOriginal: false }
     );
   } else {
-    message = 'failed';
+    message = "failed";
+     thankRetryMsg = "Retry again Or with sabPaisa ";
     let updatePaymentInCart = await CustomerCart.findOneAndUpdate(
       { _id: userDbId },
       {
@@ -218,6 +220,7 @@ let message;
     totalInCart: UserData.totalCart,
     productsInCart: UserData.productsInCart,
     customerKey: UserData.customerKey,
+    paymentStatus:message,
     paymentDetails: [paytmPaymDetail],
   });
   let saveCustomerAndpayment = await customerAndpayment
@@ -240,25 +243,23 @@ let message;
         from: "no-reply@apnakhet.org",
         subject: "Order Confirmation",
         html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
-            <p>Order with payment id : ${paytmPaymDetail.txnId} </p>
-            <p>${strmsg}</p>
-            <p>have been "${message}" of total cost  ${result.totalCost} via Paytm </p>
-            <p>We are heartly thankful to You </p>
-            <p>Note: Retry with sabPaisa if payment failed </p>
+            <p>Order with payment id : ${paytmPaymDetail.txnId} ${strmsg} is "${message}" of total cost  ${result.totalCost} via Paytm</p>
+            <p>${thankRetryMsg}</p>
+            <img src="cid:uniq-greet.jpeg"  alt="greeting image" />
       `,
-      attachments: [
-        {
-            filename: 'greet.jpeg',
-            path:greetpath + '\\greet.jpeg',
-            cid: 'uniq-greet.jpeg'
-        }
-    ]
+        attachments: [
+          {
+            filename: "greet.jpeg",
+            path: greetpath + "\\greet.jpeg",
+            cid: "uniq-greet.jpeg", 
+          },
+        ],
       };
       mailTransporter.sendMail(mailDetails, function (err, data) {
         if (err) {
-          console.log("Error Occurs",mailDetails);
+          console.log("Error Occurs", err);
         } else {
-          console.log("Email sent successfully",mailDetails);
+          console.log("Email sent successfully", mailDetails);
         }
       });
     });

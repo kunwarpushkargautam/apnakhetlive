@@ -10,6 +10,7 @@ let shopProducts = [
     incart: 0,
     info: "One box contains 12 pieces green (ready to ripen) premium quality Maldha mango. We are not using any chemical/gas for ripening it. Mango naturally ripen in your home. PLEASE NOTE - We are not using any type of chemical/gas after harvest, so sometimes black spots my be appears on the skin of fruit. This is the beauty of natural products, we have to bear this",
   },
+  
 ];
 
 let populateShopCard = () => {

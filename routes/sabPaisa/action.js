@@ -28,8 +28,10 @@ console.log("greet from sabpaisa",greetpath)
 var spURL = null;
 // const success = `http://localhost:3000/response.js`;
 // const failure = `http://localhost:3000/response.js`;
-const success = `https://apnakhetlive.herokuapp.com/response.js`;
-const failure = `https://apnakhetlive.herokuapp.com/response.js`;
+const success = `https://apnakhet.in/response.js`;
+const failure = `https://apnakhet.in/response.js`;
+// const success = `https://apnakhetlive.herokuapp.com/response.js`;
+// const failure = `https://apnakhetlive.herokuapp.com/response.js`;
 var spCkey;
 
 exports.sabPaisa = async (req, res) => {
@@ -39,7 +41,11 @@ exports.sabPaisa = async (req, res) => {
     console.log("i am coming")
     res.json({ paymentstatus: "absentKey" });
   } else {
-    const UserData = await CustomerCart.findOne({ customerKey: spCkey.keyId });
+    const UserData = await CustomerCart.findOne({ customerKey: spCkey.keyId});
+    if(UserData === null){
+      console.log("hyy i am here")
+      res.json({ paymentstatus: "err" });
+    }
     console.log("payment status==>", UserData.paymentStatus);
     console.log(UserData.paymentStatus === "success");
     if (UserData.paymentStatus === "success") {
@@ -287,7 +293,7 @@ exports.postSpRes = async (req, res) => {
             <p>${strmsg}</p>
             <p>of Total Amount  ${result.totalCost} via SabPaisa </p>
             <p>We are heartly thankful to You for purchasing from us</p>
-            <img src="cid:uniq-greet.jpeg" style="width:250px;" alt="greeting image" />
+            <img src="cid:uniq-greet.jpeg"  alt="greeting image" />
             `,
             attachments: [
               {
@@ -397,6 +403,7 @@ exports.spresponse = async (req, res) => {
       totalInCart: UserData.totalCart,
       productsInCart: UserData.productsInCart,
       customerKey: UserData.customerKey,
+      paymentStatus:message,
       paymentDetails: [sabPaisaPaymDetail],
     });
     let saveCustomerAndpayment = await customerAndpayment
@@ -431,7 +438,7 @@ exports.spresponse = async (req, res) => {
         } else {
           mailDetails = {
             to: email,
-            from: "no-reply@apnakhet.org",
+            from: "no-reply@apnakhet.org", 
             subject: "Order Status",
             html: `<h2>Greetings from Apna Khet Bagan Foundtion</h2>
           <p>We have received payments with payment id : ${sabPaisaPaymDetail.txnId} </p>
@@ -443,7 +450,7 @@ exports.spresponse = async (req, res) => {
             attachments: [
               {
                 filename: "greet.jpeg",
-                path: greetpath + "\\greet.jpeg",
+                path: greetpath + "\\greet.jpeg",   
                 cid: "uniq-greet.jpeg",
               },
             ],

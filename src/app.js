@@ -9,6 +9,8 @@ const Customer = require("./models/customerDetailSchema");
 const bodyParser = require('body-parser');
 require("./db/connection");
 var crypto = require('crypto');
+var cookieParser = require('cookie-parser');
+
 
 const port = process.env.PORT || 3000;
 
@@ -26,7 +28,7 @@ app.set("view engine", "hbs");
 app.set("views", views_path);
 hbs.registerPartials(partial_path);
 
-
+app.use(cookieParser());
 app.use('/',require('../routes/pages'));
 app.use('/productList',require('../routes/productList'));
 

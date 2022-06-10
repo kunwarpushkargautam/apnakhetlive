@@ -33,29 +33,48 @@ exports.customerAddress = (req, res) => {
 };
 exports.saveAddress = async (req, res) => {
   var parseData = req.body;
+      let fullname= parseData.fullname.toLowerCase();
+      let whatsapp= parseData.whatsapp.toLowerCase();
+      let email= parseData.custEmail;
+      let house= parseData.house.toLowerCase();
+      let street= parseData.street.toLowerCase();
+      let landmark= parseData.landmark.toLowerCase();
+      let pinCode= parseData.postPinCode.toLowerCase();
+      let city= parseData.postCity.toLowerCase();
+      let state= parseData.postState.toLowerCase();
+      console.log("==========>",fullname)
   try {
     const customerDetail = new Customer({
-      fullname: parseData.fullname,
-      whatsapp: parseData.whatsapp,
-      email: parseData.custEmail,
-      house: parseData.house,
-      street: parseData.street,
-      landmark: parseData.landmark,
-      pinCode: parseData.postPinCode,
-      city: parseData.postCity,
-      state: parseData.postState,
+      fullname: fullname,
+      whatsapp: whatsapp,
+      email: email,
+      house: house,
+      street: street,
+      landmark: landmark,
+      pinCode: pinCode,
+      city: city,
+      state: state,
     });
     const saveCustAddress = await customerDetail.save();
     console.log("data saved only address");
     res.status(201).redirect("/paymentOption");
   } catch (err) {
     console.log(err);
+    res.render("error",{statusCode : 404,error:"Ooops!! went Unexpected , We will back soon :-P ,Have a nice day!!",desMsg:"Try After few Hours , Techies are solving this issue."});
   }
 };
 exports.saveAddressandCart = async (req, res) => {
   var cartSaveid;
   var parseData = req.body;
-
+  let fullname= parseData.fullname.toLowerCase();
+  let whatsapp= parseData.whatsapp.toLowerCase();
+  let email= parseData.custEmail;
+  let house= parseData.house.toLowerCase();
+  let street= parseData.street.toLowerCase();
+  let landmark= parseData.landmark.toLowerCase();
+  let pinCode= parseData.postPinCode.toLowerCase();
+  let city= parseData.postCity.toLowerCase();
+  let state= parseData.postState.toLowerCase();
   var cartReceived = parseData.cartDataObj;
 
   console.log("received this data", parseData.cartDataObj);
@@ -64,20 +83,20 @@ exports.saveAddressandCart = async (req, res) => {
   });
   try {
     const customerDetailCart = new CustomerCart({
-      fullname: parseData.fullname,
-      whatsapp: parseData.whatsapp,
-      email: parseData.custEmail,
-      house: parseData.house,
-      street: parseData.street,
-      landmark: parseData.landmark,
-      pinCode: parseData.postPinCode,
-      city: parseData.postCity,
-      state: parseData.postState,
+      fullname: fullname,
+      whatsapp: whatsapp,
+      email: email,
+      house: house,
+      street: street,
+      landmark: landmark,
+      pinCode: pinCode,
+      city: city,
+      state: state,
       originalCost: parseData.oriTotalCost,
       totalCost: parseData.totalCost,
       totalInCart: parseData.totalCart,
       productsInCart: cartReceivedList,
-      customerKey: parseData.customerKey,
+      customerKey: parseData.customerKey, 
     });
     const saveCustAddress = await customerDetailCart.save((err, data) => {
       cartSaveid = data._id.toString();
@@ -87,6 +106,7 @@ exports.saveAddressandCart = async (req, res) => {
     console.log("data saved");
   } catch (err) {
     console.log(err);
+    res.render("error",{statusCode : 404,error:"Ooops!! went Unexpected , We will back soon :-P ,Have a nice day!!",desMsg:"Try After few Hours , Techies are solving this issue."});
   }  
 
   res.send(cartSaveid);
@@ -95,9 +115,10 @@ exports.saveAddressandCart = async (req, res) => {
 
 exports.helpQuerry = async (req, res) => {
   try {
-    const { querrymail, querrysubject, querrytext } = req.body;
-    if (querrymail != null && querrysubject != null && querrytext != null) {
+    const { querryname,querrymail, querrysubject, querrytext } = req.body;
+    if (querryname != null && querrymail != null && querrysubject != null && querrytext != null) {
       const helpQuerry = new HelpAndSupport({
+        name:querryname,
         email: querrymail,
         topic: querrysubject,
         message: querrytext,
@@ -107,6 +128,7 @@ exports.helpQuerry = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
+    res.render("error",{statusCode : 404,error:"Ooops!! went Unexpected , We will back soon :-P ,Have a nice day!!",desMsg:"Try After few Hours , Techies are solving this issue."});
   }
 };
 
@@ -136,3 +158,4 @@ exports.gpayorder = (req, res) => {
 exports.newsAndArticles = (req, res) => {
   res.render("news");
 };
+
